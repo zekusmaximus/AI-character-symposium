@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import SecureStorage from '../services/SecureStorage';
 
 // Define the types for our context
 interface ApiKeyContextType {
@@ -60,8 +61,9 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Set an API key and store it securely
   const setApiKey = async (service: 'openai' | 'anthropic', key: string) => {
     try {
-      await window.electron.apiKeys.set(service, key);
-      
+      // Encrypt the API key before sending to backend
+      const encryptedKey = SecureStorage.encrypt(key);
+      await window.electron.apiKeys.set(service, encryptedKey);
       setApiKeys(prev => ({
         ...prev,
         [service]: key ? '••••••••••••••••' : ''
