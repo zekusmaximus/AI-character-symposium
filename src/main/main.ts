@@ -72,6 +72,16 @@ app.on('window-all-closed', () => {
 });
 
 // Set up IPC handlers for renderer process communication
+ipcMain.handle('set-api-key', async (event, { service, key }) => {
+  await keytar.setPassword('ai-character-council', service, key);
+  return { success: true };
+});
+
+ipcMain.handle('get-api-key', async (event, { service }) => {
+  const key = await keytar.getPassword('ai-character-council', service);
+  return { success: true, key };
+});
+
 ipcMain.handle('get-app-info', () => {
   return {
     version: app.getVersion(),
