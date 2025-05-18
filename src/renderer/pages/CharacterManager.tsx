@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 const CharacterManager: React.FC = () => {
@@ -38,10 +38,13 @@ const CharacterManager: React.FC = () => {
     traits: ''
   });
 
-  const filteredCharacters = characters.filter(character => 
-    character.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    character.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    character.traits.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCharacters = useMemo(() =>
+    characters.filter(character => 
+      character.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      character.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      character.traits.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    [characters, searchTerm]
   );
 
   const handleCreateCharacter = () => {

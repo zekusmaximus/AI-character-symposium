@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { 
   createBrowserRouter, 
   RouterProvider, 
@@ -6,11 +6,11 @@ import {
   createRoutesFromElements,
   Outlet
 } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import CharacterManager from './pages/CharacterManager';
-import CharacterDetail from './pages/CharacterDetail';
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const CharacterManager = lazy(() => import('./pages/CharacterManager'));
+const CharacterDetail = lazy(() => import('./pages/CharacterDetail'));
+const Settings = lazy(() => import('./pages/Settings'));
 import Conversation from './pages/Conversation';
-import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { ApiKeyProvider } from './contexts/ApiKeyContext';
@@ -40,18 +40,43 @@ const AppLayout: React.FC = () => {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<AppLayout />}>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/characters" element={<CharacterManager />} />
-      <Route path="/characters/:id" element={<CharacterDetail />} />
+      <Route 
+        path="/" 
+        element={
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <Dashboard />
+          </Suspense>
+        } 
+      />
+      <Route 
+        path="/characters" 
+        element={
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <CharacterManager />
+          </Suspense>
+        } 
+      />
+      <Route 
+        path="/characters/:id" 
+        element={
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <CharacterDetail />
+          </Suspense>
+        } 
+      />
       <Route path="/conversations/:id" element={<Conversation />} />
-      <Route path="/settings" element={<Settings />} />
-      {/* Add 404 route */}
+      <Route 
+        path="/settings" 
+        element={
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <Settings />
+          </Suspense>
+        } 
+      />
       <Route path="*" element={<div>Page not found</div>} />
     </Route>
   ),
   {
-    // For Electron apps, we typically use hash routing
-    // but should create a custom history for electron
     basename: '/'
   }
 );
