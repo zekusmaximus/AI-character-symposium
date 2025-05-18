@@ -1,4 +1,3 @@
-import React from 'react';
 import { PrismaClient } from '@prisma/client';
 import { ipcMain } from 'electron';
 

@@ -35,8 +35,8 @@ function createWindow() {
 
 // Initialize app
 app.whenReady().then(() => {
+  setupAIHandlers(); // Register handlers first
   createWindow();
-  setupAIHandlers();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
