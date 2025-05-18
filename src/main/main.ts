@@ -1,7 +1,16 @@
+console.log('Electron main process started');
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import { setupAIHandlers } from './services/AIService';
 import * as keytar from 'keytar';
+
+// Add global error handlers at the top
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -72,14 +81,25 @@ app.on('window-all-closed', () => {
 });
 
 // Set up IPC handlers for renderer process communication
-ipcMain.handle('set-api-key', async (event, { service, key }) => {
-  await keytar.setPassword('ai-character-council', service, key);
+// Remove duplicate handlers for set-api-key and get-api-key
+// ipcMain.handle('set-api-key', async (event, { service, key }) => {
+//   await keytar.setPassword('ai-character-council', service, key);
+//   return { success: true };
+// });
+//
+// ipcMain.handle('get-api-key', async (event, { service }) => {
+//   const key = await keytar.getPassword('ai-character-council', service);
+//   return { success: true, key };
+// });
+
+// Add missing handlers for OpenAI and Anthropic keys
+ipcMain.handle('set-openai-key', async (event, key) => {
+  await keytar.setPassword('ai-character-council', 'openai', key);
   return { success: true };
 });
-
-ipcMain.handle('get-api-key', async (event, { service }) => {
-  const key = await keytar.getPassword('ai-character-council', service);
-  return { success: true, key };
+ipcMain.handle('set-anthropic-key', async (event, key) => {
+  await keytar.setPassword('ai-character-council', 'anthropic', key);
+  return { success: true };
 });
 
 ipcMain.handle('get-app-info', () => {

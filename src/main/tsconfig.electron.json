@@ -3,7 +3,7 @@
     "target": "es5",
     "module": "commonjs",
     "sourceMap": true,
-    "outDir": "../dist/main",
+    "outDir": "../../dist/main",
     "rootDir": "./",
     "strict": true,
     "moduleResolution": "node",

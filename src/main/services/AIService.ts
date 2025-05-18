@@ -234,30 +234,9 @@ export const setupAIHandlers = () => {
   const aiService = AIService.getInstance();
   
   // Handle API key configuration
-  ipcMain.handle('set-api-key', async (event, { service, key }) => {
-    try {
-      if (!key) {
-        await aiService.deleteApiKey(service);
-      } else {
-        await aiService.storeApiKey(service, key);
-      }
-      return { success: true };
-    } catch (error) {
-      console.error(`Error handling API key for ${service}:`, error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
-  });
-  
+  // (Removed duplicate handler for 'set-api-key')
   // Handle API key retrieval
-  ipcMain.handle('get-api-key', async (event, service) => {
-    try {
-      const key = await aiService.getApiKey(service);
-      return { success: true, key };
-    } catch (error) {
-      console.error(`Error retrieving API key for ${service}:`, error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
-  });
+  // (Removed duplicate handler for 'get-api-key')
   
   // Handle checking if API key exists
   ipcMain.handle('has-api-key', async (event, service) => {
