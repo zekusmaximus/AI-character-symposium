@@ -12,7 +12,10 @@
     "build:react": "webpack --mode production",
     "build:electron": "tsc -p src/main/tsconfig.electron.json",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "keywords": [
     "ai",
@@ -24,18 +27,25 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@playwright/test": "^1.37.0",
     "@types/electron": "^1.4.38",
+    "@types/keytar": "^4.4.2",
+    "@types/node": "^20.8.2",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "css-loader": "^7.1.2",
     "electron": "^36.2.1",
+    "electron-builder": "^24.9.1",
     "html-webpack-plugin": "^5.6.3",
     "postcss": "^8.5.3",
     "prisma": "^6.8.2",
     "style-loader": "^4.0.0",
     "tailwindcss": "^4.1.7",
     "ts-loader": "^9.5.2",
+    "typescript": "^5.2.2",
+    "vite-tsconfig-paths": "^4.2.1",
+    "vitest": "^0.34.4",
     "webpack": "^5.99.8",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.1"
@@ -45,8 +55,12 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@types/react-router-dom": "^5.3.3",
+    "electron-env-parser": "^1.1.0",
+    "electron-store": "^8.1.0",
+    "keytar": "^7.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.0"
+    "react-router-dom": "^7.6.0",
+    "zod": "^3.22.2"
   }
 }

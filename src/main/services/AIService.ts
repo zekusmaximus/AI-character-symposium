@@ -1,14 +1,19 @@
-import { PrismaClient } from '@prisma/client';
 import { ipcMain } from 'electron';
+import { PrismaClient } from '@prisma/client';
+import * as keytar from 'keytar';
+import { randomBytes, createCipheriv, createDecipheriv, scryptSync } from 'crypto';
 
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
+// Constants for keytar service
+const SERVICE_NAME = 'AI-Character-Council';
+const ALGORITHM = 'aes-256-gcm';
+const APP_SECRET_KEY = process.env.APP_SECRET || 'default-dev-secret'; // In production, use a secure environment variable
+
 // API service for secure AI model interactions
 class AIService {
   private static instance: AIService;
-  private openaiKey: string | null = null;
-  private anthropicKey: string | null = null;
   
   private constructor() {
     // Private constructor for singleton pattern
@@ -21,26 +26,114 @@ class AIService {
     return AIService.instance;
   }
   
-  // Set API keys securely
-  public setOpenAIKey(key: string): void {
-    this.openaiKey = key;
-    // In a real implementation, we would validate the key here
-    console.log('OpenAI API key configured');
+  // Encrypt data before storing
+  private async encrypt(data: string): Promise<{ encryptedData: string, iv: string }> {
+    // Create a secure key from the app secret
+    const key = scryptSync(APP_SECRET_KEY, 'salt', 32);
+    
+    // Create a random initialization vector
+    const iv = randomBytes(16);
+    
+    // Create cipher and encrypt the data
+    const cipher = createCipheriv(ALGORITHM, key, iv);
+    let encrypted = cipher.update(data, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    
+    // Get the authentication tag
+    const authTag = cipher.getAuthTag();
+    
+    // Store the encrypted data with the IV and auth tag
+    return {
+      encryptedData: encrypted + '.' + authTag.toString('base64'),
+      iv: iv.toString('base64')
+    };
   }
   
-  public setAnthropicKey(key: string): void {
-    this.anthropicKey = key;
-    // In a real implementation, we would validate the key here
-    console.log('Anthropic API key configured');
+  // Decrypt stored data
+  private async decrypt(encryptedData: string, iv: string): Promise<string> {
+    try {
+      // Create a secure key from the app secret
+      const key = scryptSync(APP_SECRET_KEY, 'salt', 32);
+      
+      // Split encrypted data and auth tag
+      const parts = encryptedData.split('.');
+      if (parts.length !== 2) {
+        throw new Error('Invalid encrypted data format');
+      }
+      
+      const encrypted = parts[0];
+      const authTag = Buffer.from(parts[1], 'base64');
+      
+      // Create decipher
+      const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(iv, 'base64'));
+      decipher.setAuthTag(authTag);
+      
+      // Decrypt the data
+      let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+      decrypted += decipher.final('utf8');
+      
+      return decrypted;
+    } catch (error) {
+      console.error('Error decrypting data:', error);
+      throw new Error('Failed to decrypt data');
+    }
   }
   
-  // Check if keys are configured
-  public hasOpenAIKey(): boolean {
-    return !!this.openaiKey;
+  // Store API key securely
+  public async storeApiKey(service: string, key: string): Promise<void> {
+    try {
+      // Encrypt the API key
+      const { encryptedData, iv } = await this.encrypt(key);
+      
+      // Store the encrypted key and IV using keytar
+      await keytar.setPassword(SERVICE_NAME, service, encryptedData);
+      await keytar.setPassword(`${SERVICE_NAME}-iv`, service, iv);
+      
+      console.log(`${service} API key stored securely`);
+    } catch (error) {
+      console.error(`Error storing ${service} API key:`, error);
+      throw error;
+    }
   }
   
-  public hasAnthropicKey(): boolean {
-    return !!this.anthropicKey;
+  // Get API key securely
+  public async getApiKey(service: string): Promise<string | null> {
+    try {
+      // Get the encrypted key and IV
+      const encryptedData = await keytar.getPassword(SERVICE_NAME, service);
+      if (!encryptedData) {
+        return null;
+      }
+      
+      const iv = await keytar.getPassword(`${SERVICE_NAME}-iv`, service);
+      if (!iv) {
+        throw new Error('Initialization vector not found');
+      }
+      
+      // Decrypt the API key
+      return await this.decrypt(encryptedData, iv);
+    } catch (error) {
+      console.error(`Error retrieving ${service} API key:`, error);
+      return null;
+    }
+  }
+  
+  // Delete API key
+  public async deleteApiKey(service: string): Promise<void> {
+    try {
+      await keytar.deletePassword(SERVICE_NAME, service);
+      await keytar.deletePassword(`${SERVICE_NAME}-iv`, service);
+      console.log(`${service} API key removed`);
+    } catch (error) {
+      console.error(`Error removing ${service} API key:`, error);
+      throw error;
+    }
+  }
+  
+  // Check if API key exists
+  public async hasApiKey(service: string): Promise<boolean> {
+    const key = await this.getApiKey(service);
+    return !!key;
   }
   
   // Generate character response
@@ -50,19 +143,23 @@ class AIService {
     memories: any[],
     conversationStyle: string = 'accurate'
   ): Promise<string> {
-    // In a real implementation, this would call the appropriate API
-    // based on user settings and available keys
-    
-    if (this.openaiKey) {
+    // First check OpenAI
+    const openaiKey = await this.getApiKey('openai');
+    if (openaiKey) {
       console.log('Using OpenAI for response generation');
       return this.mockOpenAIResponse(character, prompt, memories, conversationStyle);
-    } else if (this.anthropicKey) {
+    } 
+    
+    // Then check Anthropic
+    const anthropicKey = await this.getApiKey('anthropic');
+    if (anthropicKey) {
       console.log('Using Anthropic for response generation');
       return this.mockAnthropicResponse(character, prompt, memories, conversationStyle);
-    } else {
-      console.log('Using local model for response generation');
-      return this.mockLocalModelResponse(character, prompt, memories, conversationStyle);
     }
+    
+    // Finally use local model if no keys available
+    console.log('Using local model for response generation');
+    return this.mockLocalModelResponse(character, prompt, memories, conversationStyle);
   }
   
   // Mock implementations for prototype
@@ -137,14 +234,40 @@ export const setupAIHandlers = () => {
   const aiService = AIService.getInstance();
   
   // Handle API key configuration
-  ipcMain.handle('set-openai-key', (event, key) => {
-    aiService.setOpenAIKey(key);
-    return { success: true };
+  ipcMain.handle('set-api-key', async (event, { service, key }) => {
+    try {
+      if (!key) {
+        await aiService.deleteApiKey(service);
+      } else {
+        await aiService.storeApiKey(service, key);
+      }
+      return { success: true };
+    } catch (error) {
+      console.error(`Error handling API key for ${service}:`, error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
   });
   
-  ipcMain.handle('set-anthropic-key', (event, key) => {
-    aiService.setAnthropicKey(key);
-    return { success: true };
+  // Handle API key retrieval
+  ipcMain.handle('get-api-key', async (event, service) => {
+    try {
+      const key = await aiService.getApiKey(service);
+      return { success: true, key };
+    } catch (error) {
+      console.error(`Error retrieving API key for ${service}:`, error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+  
+  // Handle checking if API key exists
+  ipcMain.handle('has-api-key', async (event, service) => {
+    try {
+      const hasKey = await aiService.hasApiKey(service);
+      return { success: true, hasKey };
+    } catch (error) {
+      console.error(`Error checking API key for ${service}:`, error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
   });
   
   // Handle character response generation

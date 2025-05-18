@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import { setupAIHandlers } from './services/AIService';
+import * as keytar from 'keytar';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -10,8 +11,11 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      // Disable Node.js integration in the renderer process for security
+      nodeIntegration: false,
+      // Enable Context Isolation for security
+      contextIsolation: true,
+      // Preload script to expose IPC APIs securely
       preload: path.join(__dirname, 'preload.js')
     }
   });
@@ -35,7 +39,22 @@ function createWindow() {
 
 // Initialize app
 app.whenReady().then(() => {
-  setupAIHandlers(); // Register handlers first
+  // Check if keytar is available
+  try {
+    // Test keytar functionality
+    keytar.setPassword('test-service', 'test-account', 'test-password').then(() => {
+      keytar.deletePassword('test-service', 'test-account').then(() => {
+        console.log('Secure credential storage is working properly');
+      });
+    });
+  } catch (error) {
+    console.error('Error initializing secure credential storage:', error);
+  }
+
+  // Register API handlers first
+  setupAIHandlers();
+  
+  // Create the main window
   createWindow();
 
   app.on('activate', () => {

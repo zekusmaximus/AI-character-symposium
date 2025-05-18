@@ -1,11 +1,15 @@
 import React from 'react';
 import { Character } from '../../types/character';
+import { useApiKeys } from '../../contexts/ApiKeyContext';
+import { Link } from 'react-router-dom';
 
 interface CharacterConversationProps {
   character: Character;
 }
 
 const CharacterConversation: React.FC<CharacterConversationProps> = ({ character }) => {
+  const { isConfigured } = useApiKeys();
+  
   return (
     <div>
       <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
@@ -69,7 +73,7 @@ const CharacterConversation: React.FC<CharacterConversationProps> = ({ character
             <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
               <option value="1">1 - Include all memories</option>
               <option value="2">2 - Most memories</option>
-              <option value="3" selected>3 - Important memories only</option>
+              <option value="3" defaultValue="3">3 - Important memories only</option>
               <option value="4">4 - Very important memories only</option>
               <option value="5">5 - Critical memories only</option>
             </select>
@@ -85,19 +89,31 @@ const CharacterConversation: React.FC<CharacterConversationProps> = ({ character
           </div>
         </div>
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
-          <div className="flex">
-            <input
-              type="password"
-              value="••••••••••••••••••••••••••••••"
-              className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md py-2 px-4 bg-gray-50 dark:bg-gray-700 dark:text-white"
-              disabled
-            />
-            <button className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-r-md">
-              Configure
-            </button>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Configuration Status</label>
+          <div className="flex items-center justify-between">
+            <div>
+              {isConfigured('openai') ? (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  ✓ OpenAI API key is configured
+                </p>
+              ) : isConfigured('anthropic') ? (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  ✓ Anthropic API key is configured
+                </p>
+              ) : (
+                <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                  ⚠ No API keys configured. Using local model only.
+                </p>
+              )}
+            </div>
+            <Link 
+              to="/settings" 
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md"
+            >
+              Configure APIs
+            </Link>
           </div>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">API key is securely stored and used for character conversations</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">API keys are securely stored and used for character conversations</p>
         </div>
       </div>
     </div>

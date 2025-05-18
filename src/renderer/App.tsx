@@ -13,6 +13,7 @@ import Conversation from './pages/Conversation';
 import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import { ApiKeyProvider } from './contexts/ApiKeyContext';
 
 /**
  * Layout component that provides the application's common UI structure
@@ -56,10 +57,14 @@ const router = createBrowserRouter(
 );
 
 /**
- * Main App component that provides the router
+ * Main App component that provides the router and context providers
  */
 const App: React.FC = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <ApiKeyProvider>
+      <RouterProvider router={router} />
+    </ApiKeyProvider>
+  );
 };
 
 export default App;

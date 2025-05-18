@@ -12,9 +12,12 @@ contextBridge.exposeInMainWorld('electron', {
   // App info methods
   getAppInfo: () => ipcRenderer.invoke('get-app-info'),
   
-  // API key management
-  setOpenAIKey: (key) => ipcRenderer.invoke('set-openai-key', key),
-  setAnthropicKey: (key) => ipcRenderer.invoke('set-anthropic-key', key),
+  // API key management - Unified API with proper method naming
+  apiKeys: {
+    set: (service, key) => ipcRenderer.invoke('set-api-key', { service, key }),
+    get: (service) => ipcRenderer.invoke('get-api-key', service),
+    has: (service) => ipcRenderer.invoke('has-api-key', service),
+  },
   
   // Character AI functionality
   generateCharacterResponse: (characterId, prompt, conversationStyle) => 
@@ -24,36 +27,34 @@ contextBridge.exposeInMainWorld('electron', {
       conversationStyle 
     }),
     
-  // You can add additional functionality here as needed
-  // Examples of other methods you might want to expose:
-  
   // Character management
-  getCharacter: (characterId) => 
-    ipcRenderer.invoke('get-character', characterId),
-  
-  createCharacter: (characterData) => 
-    ipcRenderer.invoke('create-character', characterData),
-  
-  updateCharacter: (characterId, characterData) => 
-    ipcRenderer.invoke('update-character', { characterId, characterData }),
-  
-  deleteCharacter: (characterId) => 
-    ipcRenderer.invoke('delete-character', characterId),
+  character: {
+    get: (characterId) => ipcRenderer.invoke('get-character', characterId),
+    create: (characterData) => ipcRenderer.invoke('create-character', characterData),
+    update: (characterId, characterData) => ipcRenderer.invoke('update-character', { characterId, characterData }),
+    delete: (characterId) => ipcRenderer.invoke('delete-character', characterId),
+  },
   
   // Memory management
-  createMemory: (memory) => 
-    ipcRenderer.invoke('create-memory', memory),
+  memory: {
+    create: (memory) => ipcRenderer.invoke('create-memory', memory),
+    get: (characterId) => ipcRenderer.invoke('get-memories', characterId),
+    update: (memoryId, memoryData) => ipcRenderer.invoke('update-memory', { memoryId, memoryData }),
+    delete: (memoryId) => ipcRenderer.invoke('delete-memory', memoryId),
+  },
   
   // Conversation history
-  saveConversation: (conversation) => 
-    ipcRenderer.invoke('save-conversation', conversation),
+  conversation: {
+    save: (conversation) => ipcRenderer.invoke('save-conversation', conversation),
+    get: (conversationId) => ipcRenderer.invoke('get-conversation', conversationId),
+    list: (characterId) => ipcRenderer.invoke('list-conversations', characterId),
+  },
   
   // Settings and preferences
-  saveSettings: (settings) => 
-    ipcRenderer.invoke('save-settings', settings),
-  
-  getSettings: () => 
-    ipcRenderer.invoke('get-settings'),
+  settings: {
+    save: (settings) => ipcRenderer.invoke('save-settings', settings),
+    get: () => ipcRenderer.invoke('get-settings'),
+  },
 });
 
 // Note: You should NOT have any other code that modifies the window object

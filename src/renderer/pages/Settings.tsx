@@ -1,72 +1,39 @@
 import React, { useState } from 'react';
-
-// This is a placeholder service for API key management
-// In a real implementation, this would use secure storage and encryption
-const ApiKeyService = {
-  getKey: (service: string): string | null => {
-    // In a real app, this would retrieve from secure storage
-    const storedKeys = localStorage.getItem('api_keys');
-    if (!storedKeys) return null;
-    
-    try {
-      const keys = JSON.parse(storedKeys);
-      return keys[service] || null;
-    } catch (e) {
-      console.error('Error parsing stored API keys', e);
-      return null;
-    }
-  },
-  
-  setKey: (service: string, key: string): void => {
-    // In a real app, this would store in secure storage
-    let keys = {};
-    const storedKeys = localStorage.getItem('api_keys');
-    
-    if (storedKeys) {
-      try {
-        keys = JSON.parse(storedKeys);
-      } catch (e) {
-        console.error('Error parsing stored API keys', e);
-      }
-    }
-    
-    keys = { ...keys, [service]: key };
-    localStorage.setItem('api_keys', JSON.stringify(keys));
-  },
-  
-  removeKey: (service: string): void => {
-    const storedKeys = localStorage.getItem('api_keys');
-    if (!storedKeys) return;
-    
-    try {
-      const keys = JSON.parse(storedKeys);
-      delete keys[service];
-      localStorage.setItem('api_keys', JSON.stringify(keys));
-    } catch (e) {
-      console.error('Error parsing stored API keys', e);
-    }
-  }
-};
+import { useApiKeys } from '../contexts/ApiKeyContext';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
-  const [apiKeys, setApiKeys] = useState({
-    openai: '',
-    anthropic: '',
-    local: 'enabled'
-  });
+  const { apiKeys, setApiKey, clearApiKey, isConfigured } = useApiKeys();
   const [showApiKey, setShowApiKey] = useState({
     openai: false,
     anthropic: false
+  });
+  const [tempApiKeys, setTempApiKeys] = useState({
+    openai: '',
+    anthropic: ''
   });
   const [theme, setTheme] = useState('system');
   const [embeddingModel, setEmbeddingModel] = useState('local-small');
   const [offlineMode, setOfflineMode] = useState(false);
   
-  const handleSaveApiKey = (service: string) => {
-    // In a real app, this would securely store the API key
-    ApiKeyService.setKey(service, apiKeys[service as keyof typeof apiKeys] as string);
-    alert(`${service.charAt(0).toUpperCase() + service.slice(1)} API key saved successfully!`);
+  // Load the keys from context when the component mounts or when the tab changes to API
+  React.useEffect(() => {
+    if (activeTab === 'api') {
+      setTempApiKeys({
+        openai: apiKeys.openai || '',
+        anthropic: apiKeys.anthropic || ''
+      });
+    }
+  }, [activeTab, apiKeys]);
+
+  const handleSaveApiKey = (service: 'openai' | 'anthropic') => {
+    if (tempApiKeys[service]) {
+      setApiKey(service, tempApiKeys[service]);
+      alert(`${service.charAt(0).toUpperCase() + service.slice(1)} API key saved successfully!`);
+    } else {
+      clearApiKey(service);
+      alert(`${service.charAt(0).toUpperCase() + service.slice(1)} API key removed!`);
+    }
   };
   
   return (
@@ -189,7 +156,7 @@ const Settings: React.FC = () => {
                       <p className="text-sm text-gray-500 dark:text-gray-400">Automatically save changes</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked />
+                      <input type="checkbox" className="sr-only peer" defaultChecked={true} />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
                     </label>
                   </div>
@@ -220,8 +187,8 @@ const Settings: React.FC = () => {
                       type={showApiKey.openai ? "text" : "password"}
                       className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                       placeholder="sk-..."
-                      value={apiKeys.openai}
-                      onChange={(e) => setApiKeys({...apiKeys, openai: e.target.value})}
+                      value={tempApiKeys.openai}
+                      onChange={(e) => setTempApiKeys({...tempApiKeys, openai: e.target.value})}
                     />
                     <button 
                       className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border-y border-r border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 py-2 px-4"
@@ -236,6 +203,12 @@ const Settings: React.FC = () => {
                       Save
                     </button>
                   </div>
+                  
+                  {isConfigured('openai') && (
+                    <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                      ✓ OpenAI API key is configured
+                    </p>
+                  )}
                 </div>
                 
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
@@ -249,8 +222,8 @@ const Settings: React.FC = () => {
                       type={showApiKey.anthropic ? "text" : "password"}
                       className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                       placeholder="sk_ant-..."
-                      value={apiKeys.anthropic}
-                      onChange={(e) => setApiKeys({...apiKeys, anthropic: e.target.value})}
+                      value={tempApiKeys.anthropic}
+                      onChange={(e) => setTempApiKeys({...tempApiKeys, anthropic: e.target.value})}
                     />
                     <button 
                       className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border-y border-r border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 py-2 px-4"
@@ -265,6 +238,12 @@ const Settings: React.FC = () => {
                       Save
                     </button>
                   </div>
+                  
+                  {isConfigured('anthropic') && (
+                    <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                      ✓ Anthropic API key is configured
+                    </p>
+                  )}
                 </div>
                 
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
@@ -461,9 +440,10 @@ const Settings: React.FC = () => {
                     <select
                       id="backup-frequency"
                       className="border border-gray-300 dark:border-gray-600 rounded-md py-1 px-2 dark:bg-gray-700 dark:text-white"
+                      defaultValue="weekly"
                     >
                       <option value="daily">Daily</option>
-                      <option value="weekly" selected>Weekly</option>
+                      <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>
                     </select>
                   </div>
@@ -476,7 +456,7 @@ const Settings: React.FC = () => {
                       type="text"
                       id="backup-location"
                       className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md py-1 px-2 dark:bg-gray-700 dark:text-white"
-                      value="C:\Users\Username\Documents\AI Character Council\Backups"
+                      defaultValue="C:\Users\Username\Documents\AI Character Council\Backups"
                       readOnly
                     />
                     <button className="px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md ml-2">
