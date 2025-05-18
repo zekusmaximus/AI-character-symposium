@@ -70,8 +70,17 @@ declare global {
         save: (settings: any) => Promise<{ success: boolean, error?: string }>;
         get: () => Promise<any>;
       };
+
+      // Add ipcRenderer property for direct IPC access
+      ipcRenderer: {
+        invoke: (channel: string, ...args: any[]) => Promise<any>;
+        on?: (channel: string, listener: (...args: any[]) => void) => void;
+        once?: (channel: string, listener: (...args: any[]) => void) => void;
+        removeListener?: (channel: string, listener: (...args: any[]) => void) => void;
+      };
     };
   }
+  
 }
 
 export {};
