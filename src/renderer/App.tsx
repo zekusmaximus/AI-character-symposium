@@ -4,8 +4,6 @@ import Dashboard from './pages/Dashboard';
 import CharacterManager from './pages/CharacterManager';
 import CharacterDetail from './pages/CharacterDetail';
 import Conversation from './pages/Conversation';
-import Timeline from './pages/Timeline';
-import Notes from './pages/Notes';
 import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -25,8 +23,6 @@ const App: React.FC = () => {
               <Route path="/characters" element={<CharacterManager />} />
               <Route path="/characters/:id" element={<CharacterDetail />} />
               <Route path="/conversations/:id" element={<Conversation />} />
-              <Route path="/timelines" element={<Timeline />} />
-              <Route path="/notes" element={<Notes />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

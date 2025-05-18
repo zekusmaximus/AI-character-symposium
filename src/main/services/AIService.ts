@@ -89,7 +89,7 @@ class AIService {
     } else if (prompt.toLowerCase().includes('think') || prompt.toLowerCase().includes('opinion')) {
       response = `I think ${traits.includes('strategic') ? 'we should approach this methodically' : traits.includes('wise') ? 'there is more to this than meets the eye' : 'we should consider all angles'}. ${values.includes('truth') ? 'The truth is what matters most.' : ''}`;
     } else {
-      response = `${traits.includes('mysterious') ? 'There are many layers to this situation.' : traits.includes('intelligent') ? 'I've analyzed this carefully.' : 'I understand your question.'} ${values.includes('knowledge') ? 'Knowledge is the key to understanding.' : values.includes('progress') ? 'Progress requires bold action.' : 'Let me share my perspective.'}`;
+      response = `${traits.includes('mysterious') ? 'There are many layers to this situation.' : traits.includes('intelligent') ? 'I have analyzed this carefully.' : 'I understand your question.'} ${values.includes('knowledge') ? 'Knowledge is the key to understanding.' : values.includes('progress') ? 'Progress requires bold action.' : 'Let me share my perspective.'}`;
     }
     
     // Adjust response based on conversation style
