@@ -127,6 +127,57 @@ ipcMain.handle('get-timeline-events', async () => {
   }
 });
 
+// Note IPC Handlers
+
+ipcMain.handle('get-notes', async () => {
+  try {
+    const notes = await prisma.note.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return { success: true, data: notes };
+  } catch (error: any) {
+    console.error('Error fetching notes:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-note', async (event, data: { title: string, content: string, tags?: string, projectId: string }) => {
+  try {
+    const newNote = await prisma.note.create({
+      data
+    });
+    return { success: true, data: newNote };
+  } catch (error: any) {
+    console.error('Error creating note:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('update-note', async (event, { id, data }: { id: string, data: { title?: string, content?: string, tags?: string }}) => {
+  try {
+    const updatedNote = await prisma.note.update({
+      where: { id },
+      data
+    });
+    return { success: true, data: updatedNote };
+  } catch (error: any) {
+    console.error('Error updating note:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-note', async (event, id: string) => {
+  try {
+    await prisma.note.delete({
+      where: { id }
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting note:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string }) => {
   try {
     const newEvent = await prisma.timelineEvent.create({

@@ -10,6 +10,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const CharacterManager = lazy(() => import('./pages/CharacterManager'));
 const CharacterDetail = lazy(() => import('./pages/CharacterDetail'));
 const TimelinesPage = lazy(() => import('./pages/Timelines')); // Added TimelinesPage
+const NotesPage = lazy(() => import('./pages/NotesPage')); // Added NotesPage
 const Settings = lazy(() => import('./pages/Settings'));
 import Conversation from './pages/Conversation';
 import Sidebar from './components/Sidebar';
@@ -70,6 +71,14 @@ const router = createBrowserRouter(
         element={
           <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
             <TimelinesPage />
+          </Suspense>
+        }
+      />
+      <Route 
+        path="/notes"
+        element={
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <NotesPage />
           </Suspense>
         }
       />
