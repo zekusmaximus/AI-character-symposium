@@ -9,6 +9,7 @@ import {
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const CharacterManager = lazy(() => import('./pages/CharacterManager'));
 const CharacterDetail = lazy(() => import('./pages/CharacterDetail'));
+const TimelinesPage = lazy(() => import('./pages/Timelines')); // Added TimelinesPage
 const Settings = lazy(() => import('./pages/Settings'));
 import Conversation from './pages/Conversation';
 import Sidebar from './components/Sidebar';
@@ -26,7 +27,7 @@ const AppLayout: React.FC = () => {
       <Sidebar isOpen={sidebarOpen} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-y-auto p-4">
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>
@@ -63,6 +64,14 @@ const router = createBrowserRouter(
             <CharacterDetail />
           </Suspense>
         } 
+      />
+      <Route 
+        path="/timelines"
+        element={
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <TimelinesPage />
+          </Suspense>
+        }
       />
       <Route path="/conversations/:id" element={<Conversation />} />
       <Route 

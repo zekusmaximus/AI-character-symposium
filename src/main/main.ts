@@ -1,8 +1,11 @@
 console.log('Electron main process started');
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
+import { PrismaClient } from '@prisma/client';
 import { setupAIHandlers } from './services/AIService';
 import * as keytar from 'keytar';
+
+const prisma = new PrismaClient();
 
 // Add global error handlers at the top
 process.on('uncaughtException', (err) => {
@@ -108,4 +111,61 @@ ipcMain.handle('get-app-info', () => {
     name: app.getName(),
     platform: process.platform
   };
+});
+
+// TimelineEvent IPC Handlers
+
+ipcMain.handle('get-timeline-events', async () => {
+  try {
+    const events = await prisma.timelineEvent.findMany({
+      orderBy: { date: 'asc' }
+    });
+    return { success: true, data: events };
+  } catch (error: any) {
+    console.error('Error fetching timeline events:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string }) => {
+  try {
+    const newEvent = await prisma.timelineEvent.create({
+      data: {
+        ...data,
+        date: new Date(data.date)
+      }
+    });
+    return { success: true, data: newEvent };
+  } catch (error: any) {
+    console.error('Error creating timeline event:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('update-timeline-event', async (event, { id, data }: { id: number, data: { date?: string, description?: string, charactersInvolved?: string }}) => {
+  try {
+    const updatedEvent = await prisma.timelineEvent.update({
+      where: { id },
+      data: {
+        ...data,
+        date: data.date ? new Date(data.date) : undefined
+      }
+    });
+    return { success: true, data: updatedEvent };
+  } catch (error: any) {
+    console.error('Error updating timeline event:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-timeline-event', async (event, id: number) => {
+  try {
+    await prisma.timelineEvent.delete({
+      where: { id }
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting timeline event:', error);
+    return { success: false, error: error.message };
+  }
 });
