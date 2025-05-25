@@ -26,7 +26,7 @@ const AppLayout: React.FC = () => {
       <Sidebar isOpen={sidebarOpen} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-y-auto p-4">
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>
