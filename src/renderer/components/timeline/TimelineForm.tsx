@@ -90,7 +90,7 @@ const TimelineForm: React.FC<TimelineFormProps> = ({ isOpen, onClose, onSubmit, 
           </div>
 
           {formError && (
-            <p className="text-red-500 dark:text-red-400 text-sm mb-4 bg-red-100 dark:bg-red-900_ p-2 rounded-md">{formError}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm mb-4 bg-red-100 dark:bg-red-900 p-2 rounded-md">{formError}</p>
           )}
 
           <div className="flex justify-end space-x-3">
