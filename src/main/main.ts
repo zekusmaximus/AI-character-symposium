@@ -7,6 +7,9 @@ import * as keytar from 'keytar';
 
 const prisma = new PrismaClient();
 
+const DEFAULT_PROJECT_ID = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'; // Valid UUID v4
+const DEFAULT_PROJECT_NAME = 'Default Project';
+
 // Add global error handlers at the top
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
@@ -50,7 +53,24 @@ function createWindow() {
 }
 
 // Initialize app
-app.whenReady().then(() => {
+app.whenReady().then(async () => { // Made async
+  // Ensure default project exists
+  try {
+    await prisma.project.upsert({
+      where: { id: DEFAULT_PROJECT_ID },
+      update: {},
+      create: {
+        id: DEFAULT_PROJECT_ID,
+        name: DEFAULT_PROJECT_NAME,
+      },
+    });
+    console.log(`Ensured default project "${DEFAULT_PROJECT_NAME}" (ID: ${DEFAULT_PROJECT_ID}) exists.`);
+  } catch (error) {
+    console.error('Error ensuring default project:', error);
+    // Depending on the application's needs, you might want to handle this more gracefully,
+    // e.g., by preventing the app from starting or alerting the user.
+  }
+
   // Check if keytar is available
   try {
     // Test keytar functionality
@@ -113,11 +133,41 @@ ipcMain.handle('get-app-info', () => {
   };
 });
 
+// Project IPC Handlers
+ipcMain.handle('get-projects', async () => {
+  try {
+    const projects = await prisma.project.findMany({
+      orderBy: { createdAt: 'asc' }
+    });
+    return { success: true, data: projects };
+  } catch (error: any) {
+    console.error('Error fetching projects:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-project', async (event, data: { name: string; description?: string }) => {
+  try {
+    const newProject = await prisma.project.create({
+      data
+    });
+    return { success: true, data: newProject };
+  } catch (error: any) {
+    console.error('Error creating project:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+
 // TimelineEvent IPC Handlers
 
-ipcMain.handle('get-timeline-events', async () => {
+ipcMain.handle('get-timeline-events', async (event, timelineId: string) => {
+  if (!timelineId) {
+    return { success: false, error: 'timelineId is required to fetch timeline events.' };
+  }
   try {
     const events = await prisma.timelineEvent.findMany({
+      where: { timelineId },
       orderBy: { date: 'asc' }
     });
     return { success: true, data: events };
@@ -129,9 +179,21 @@ ipcMain.handle('get-timeline-events', async () => {
 
 // Note IPC Handlers
 
+ feature/notes-page
+ipcMain.handle('get-notes', async (event, projectId?: string | null) => {
+  try {
+    let targetProjectId = DEFAULT_PROJECT_ID; // Default to DEFAULT_PROJECT_ID
+    if (projectId && projectId.trim() !== '') {
+      targetProjectId = projectId;
+    }
+
+    const notes = await prisma.note.findMany({
+      where: { projectId: targetProjectId },
+
 ipcMain.handle('get-notes', async () => {
   try {
     const notes = await prisma.note.findMany({
+main
       orderBy: { createdAt: 'desc' }
     });
     return { success: true, data: notes };
@@ -177,13 +239,17 @@ ipcMain.handle('delete-note', async (event, id: string) => {
     return { success: false, error: error.message };
   }
 });
+ feature/notes-page
+ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string, timelineId: string }) => {
 
 ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string }) => {
+ main
   try {
     const newEvent = await prisma.timelineEvent.create({
       data: {
         ...data,
-        date: new Date(data.date)
+        date: new Date(data.date),
+        // timelineId is already part of data due to updated signature
       }
     });
     return { success: true, data: newEvent };

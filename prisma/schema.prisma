@@ -80,6 +80,7 @@ model Timeline {
   updatedAt   DateTime        @updatedAt
   projectId   String
   project     Project         @relation(fields: [projectId], references: [id])
+  events      TimelineEvent[]
 }
 
 model TimelineEvent {
@@ -89,6 +90,8 @@ model TimelineEvent {
   charactersInvolved  String // Changed from String[]
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  timelineId          String
+  timeline            Timeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
 }
 
 model Relationship {

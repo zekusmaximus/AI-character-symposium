@@ -16,6 +16,7 @@ import Conversation from './pages/Conversation';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { ApiKeyProvider } from './contexts/ApiKeyContext';
+import { ProjectProvider } from './contexts/ProjectContext'; // Added ProjectProvider
 
 /**
  * Layout component that provides the application's common UI structure
@@ -105,7 +106,9 @@ const router = createBrowserRouter(
 const App: React.FC = () => {
   return (
     <ApiKeyProvider>
-      <RouterProvider router={router} />
+      <ProjectProvider> {/* Added ProjectProvider wrapper */}
+        <RouterProvider router={router} />
+      </ProjectProvider>
     </ApiKeyProvider>
   );
 };
