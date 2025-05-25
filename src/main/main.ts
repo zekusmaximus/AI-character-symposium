@@ -218,10 +218,6 @@ ipcMain.handle('get-timeline-events', async (event, timelineId: string) => {
 
 // Note IPC Handlers
 
-feature/notes-page
-
- feature/notes-page
- main
 ipcMain.handle('get-notes', async (event, projectId?: string | null) => {
   try {
     let targetProjectId = DEFAULT_PROJECT_ID; // Default to DEFAULT_PROJECT_ID
@@ -231,14 +227,6 @@ ipcMain.handle('get-notes', async (event, projectId?: string | null) => {
 
     const notes = await prisma.note.findMany({
       where: { projectId: targetProjectId },
- feature/notes-page
-
-
-ipcMain.handle('get-notes', async () => {
-  try {
-    const notes = await prisma.note.findMany({
-main
- main
       orderBy: { createdAt: 'desc' }
     });
     return { success: true, data: notes };
@@ -284,22 +272,15 @@ ipcMain.handle('delete-note', async (event, id: string) => {
     return { success: false, error: error.message };
   }
 });
-feature/notes-page
 
 ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string, timelineId: string }) => {
-
- feature/notes-page
-ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string, timelineId: string }) => {
-
-ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string }) => {
- main
- main
   try {
     const newEvent = await prisma.timelineEvent.create({
       data: {
-        ...data,
         date: new Date(data.date),
-        // timelineId is already part of data due to updated signature
+        description: data.description,
+        charactersInvolved: data.charactersInvolved,
+        timelineId: data.timelineId,
       }
     });
     return { success: true, data: newEvent };
