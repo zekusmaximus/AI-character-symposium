@@ -103,6 +103,45 @@ app.on('window-all-closed', () => {
   }
 });
 
+// Timeline IPC Handlers
+ipcMain.handle('get-timelines', async (event, projectId: string) => {
+  if (!projectId) {
+    console.error('Error fetching timelines: projectId is required.');
+    return { success: false, error: 'projectId is required to fetch timelines.' };
+  }
+  try {
+    const timelines = await prisma.timeline.findMany({
+      where: { projectId },
+      orderBy: { name: 'asc' }
+    });
+    return { success: true, data: timelines };
+  } catch (error: any) {
+    console.error('Error fetching timelines:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-timeline', async (event, data: { name: string; description?: string; projectId: string }) => {
+  const { name, description, projectId } = data;
+  if (!name || !projectId) {
+    console.error('Error creating timeline: name and projectId are required.');
+    return { success: false, error: 'Name and projectId are required to create a timeline.' };
+  }
+  try {
+    const newTimeline = await prisma.timeline.create({
+      data: {
+        name,
+        description,
+        projectId
+      }
+    });
+    return { success: true, data: newTimeline };
+  } catch (error: any) {
+    console.error('Error creating timeline:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // Set up IPC handlers for renderer process communication
 // Remove duplicate handlers for set-api-key and get-api-key
 // ipcMain.handle('set-api-key', async (event, { service, key }) => {
@@ -179,7 +218,10 @@ ipcMain.handle('get-timeline-events', async (event, timelineId: string) => {
 
 // Note IPC Handlers
 
+feature/notes-page
+
  feature/notes-page
+ main
 ipcMain.handle('get-notes', async (event, projectId?: string | null) => {
   try {
     let targetProjectId = DEFAULT_PROJECT_ID; // Default to DEFAULT_PROJECT_ID
@@ -189,11 +231,14 @@ ipcMain.handle('get-notes', async (event, projectId?: string | null) => {
 
     const notes = await prisma.note.findMany({
       where: { projectId: targetProjectId },
+ feature/notes-page
+
 
 ipcMain.handle('get-notes', async () => {
   try {
     const notes = await prisma.note.findMany({
 main
+ main
       orderBy: { createdAt: 'desc' }
     });
     return { success: true, data: notes };
@@ -239,10 +284,15 @@ ipcMain.handle('delete-note', async (event, id: string) => {
     return { success: false, error: error.message };
   }
 });
+feature/notes-page
+
+ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string, timelineId: string }) => {
+
  feature/notes-page
 ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string, timelineId: string }) => {
 
 ipcMain.handle('create-timeline-event', async (event, data: { date: string, description: string, charactersInvolved: string }) => {
+ main
  main
   try {
     const newEvent = await prisma.timelineEvent.create({

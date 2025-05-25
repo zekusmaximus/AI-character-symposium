@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
  feature/notes-page
+
+ feature/notes-page
+main
 import NoteForm from '../components/notes/NoteForm';
 import { useProject } from '../contexts/ProjectContext';
 // The DEFAULT_PROJECT_ID from ProjectContext or a shared constants file would be ideal
 // For now, if needed for fallback (though we aim to disable actions), ensure it's available.
 // import { DEFAULT_PROJECT_ID } from '../contexts/ProjectContext'; // or a shared constants file
+
+feature/notes-page
 
 
 import NoteForm from '../components/notes/NoteForm'; // Assuming NoteForm is in this path
@@ -12,6 +17,7 @@ import NoteForm from '../components/notes/NoteForm'; // Assuming NoteForm is in 
 // import { Note } from '../../types'; 
 
 // Define the Note interface if not imported
+ main
  main
 interface Note {
   id: string;
@@ -24,16 +30,21 @@ interface Note {
 }
 
 const NotesPage: React.FC = () => {
+feature/notes-page
+
  feature/notes-page
+main
   const { activeProjectId, isLoadingProjects: isLoadingProjectContext } = useProject();
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoadingNotes, setIsLoadingNotes] = useState<boolean>(true); // Renamed from isLoading
   const [pageError, setPageError] = useState<string | null>(null); // Renamed from error
+feature/notes-page
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+ main
  main
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -42,6 +53,9 @@ const NotesPage: React.FC = () => {
 
   const fetchNotes = useCallback(async () => {
 feature/notes-page
+
+feature/notes-page
+main
     if (!activeProjectId) {
       setNotes([]);
       setIsLoadingNotes(false);
@@ -83,6 +97,8 @@ feature/notes-page
     }
   }, [fetchNotes, activeProjectId, isLoadingProjectContext]);
 
+feature/notes-page
+
     setIsLoading(true);
     setError(null);
     setActionError(null);
@@ -112,6 +128,7 @@ feature/notes-page
   }, [fetchNotes]);
  main
 
+main
   const handleOpenForm = (note: Note | null = null) => {
     setEditingNote(note);
     setIsFormOpen(true);
@@ -128,12 +145,18 @@ feature/notes-page
     setActionError(null);
 feature/notes-page
 
+feature/notes-page
+main
+
     if (!activeProjectId) {
       setActionError("Cannot create note: No active project selected.");
       setIsSubmitting(false);
       return;
     }
 
+ feature/notes-page
+
+ main
  main
     try {
       if (!window.electron?.ipcRenderer) {
@@ -143,11 +166,16 @@ feature/notes-page
       }
 
       let result;
+feature/notes-page
+
  feature/notes-page
+ main
       if (editingNote && noteData.id) { // Update existing note
         result = await window.electron.ipcRenderer.invoke('update-note', { id: noteData.id, data: noteData });
       } else { // Create new note
         const newNoteData = { ...noteData, projectId: activeProjectId };
+feature/notes-page
+
 
       if (editingNote && noteData.id) {
         result = await window.electron.ipcRenderer.invoke('update-note', { id: noteData.id, data: noteData });
@@ -155,6 +183,7 @@ feature/notes-page
         // For new notes, add projectId. This is a placeholder.
         // In a real app, this would come from user context or selection.
         const newNoteData = { ...noteData, projectId: "PROJECT_ID_PLACEHOLDER" };
+main
 main
         result = await window.electron.ipcRenderer.invoke('create-note', newNoteData);
       }
@@ -212,7 +241,10 @@ main
   return (
     <div className="container mx-auto p-4 pt-6 md:p-6 lg:p-8 bg-gray-100 dark:bg-gray-900 min-h-screen">
       <header className="mb-6 flex justify-between items-center">
+feature/notes-page
+
         feature/notes-page
+ main
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           {activeProjectId ? `Notes` : 'Notes'} 
         </h1>
@@ -221,6 +253,7 @@ main
           disabled={isSubmitting || !activeProjectId || isLoadingProjectContext}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 disabled:opacity-50 disabled:bg-gray-400 dark:disabled:bg-gray-600"
           title={!activeProjectId ? "Please select a project to add a new note." : "Add New Note"}
+ feature/notes-page
 
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Notes</h1>
         <button
@@ -229,6 +262,7 @@ main
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 disabled:opacity-50"
 main
         
+ main
           Add New Note
         </button>
       </header>
@@ -237,13 +271,20 @@ main
  feature/notes-page
         <div className="mb-4 p-3 bg-red-100 dark:bg-red-800 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-md">
 
+ feature/notes-page
+        <div className="mb-4 p-3 bg-red-100 dark:bg-red-800 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-md">
+
         <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-md">
+ main
  main
           <p>Error: {actionError}</p>
         </div>
       )}
 
+ feature/notes-page
+
 feature/notes-page
+ main
       {(isLoadingNotes || isLoadingProjectContext) && (
         <div className="text-center py-10">
           <p className="text-lg text-gray-600 dark:text-gray-400">
@@ -266,6 +307,8 @@ feature/notes-page
             onClick={fetchNotes}
             disabled={isSubmitting}
             className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 disabled:opacity-50"
+ feature/notes-page
+
 
       {isLoading && (
         <div className="text-center py-10">
@@ -281,13 +324,17 @@ feature/notes-page
             onClick={fetchNotes}
             className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
 main
-          >
+main
+          
             Try Again
           </button>
         </div>
       )}
 
+ feature/notes-page
+
 feature/notes-page
+ main
       {!isLoadingNotes && !isLoadingProjectContext && activeProjectId && !pageError && notes.length === 0 && (
         <div className="text-center py-10">
           <p className="text-lg text-gray-600 dark:text-gray-400">No notes found for this project.</p>
@@ -296,6 +343,8 @@ feature/notes-page
       )}
 
       {!isLoadingNotes && !isLoadingProjectContext && activeProjectId && !pageError && notes.length > 0 && (
+ feature/notes-page
+
 
       {!isLoading && !error && notes.length === 0 && (
         <div className="text-center py-10">
@@ -306,6 +355,7 @@ feature/notes-page
 
       {!isLoading && !error && notes.length > 0 && (
 main
+ main
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {notes.map((note) => (
             <div key={note.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-5 flex flex-col justify-between">
