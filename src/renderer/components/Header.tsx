@@ -1,5 +1,5 @@
 import React, { useState, Fragment } from 'react';
-import { useProject } from '../../contexts/ProjectContext';
+import { useProject } from '../contexts/ProjectContext';
 import ProjectForm from './project/ProjectForm'; // Ensure this path is correct
 import { Menu, Transition } from '@headlessui/react'; // Using Headless UI for dropdown
 import { ChevronDownIcon, FolderPlusIcon, FolderIcon } from '@heroicons/react/20/solid'; // Example icons
