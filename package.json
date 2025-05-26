@@ -55,6 +55,8 @@
     "webpack-dev-server": "^5.2.1"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.8.2",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
