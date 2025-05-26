@@ -110,22 +110,6 @@ const TimelineForm: React.FC<TimelineFormProps> = ({ isOpen, onClose, onSubmit, 
           </div>
         </form>
       </div>
-      {/* Ensure this style is either global or defined in a way that it applies */}
-      <style jsx global>{` 
-        @keyframes modalFadeInScaleUp {
-          from {
-            transform: scale(0.95);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-        .animate-modalFadeInScaleUp {
-          animation: modalFadeInScaleUp 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
