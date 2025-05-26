@@ -41,8 +41,8 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsLoading(true);
         
         // Check if API keys are configured
-        const openaiResult = await window.electron.apiKeys.has('openai');
-        const anthropicResult = await window.electron.apiKeys.has('anthropic');
+        const openaiResult = await window.electron.ipcRenderer.invoke('apiKeys:has', 'openai');
+        const anthropicResult = await window.electron.ipcRenderer.invoke('apiKeys:has', 'anthropic');
         
         setApiKeys({
           openai: openaiResult.hasKey ? '••••••••••••••••' : '',
@@ -63,7 +63,7 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       // Encrypt the API key before sending to backend
       const encryptedKey = SecureStorage.encrypt(key);
-      await window.electron.apiKeys.set(service, encryptedKey);
+      await window.electron.ipcRenderer.invoke('apiKeys:set', service, encryptedKey);
       setApiKeys(prev => ({
         ...prev,
         [service]: key ? '••••••••••••••••' : ''
@@ -82,7 +82,7 @@ export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Clear an API key
   const clearApiKey = async (service: 'openai' | 'anthropic') => {
     try {
-      await window.electron.apiKeys.set(service, '');
+      await window.electron.ipcRenderer.invoke('apiKeys:set', service, '');
       
       setApiKeys(prev => ({
         ...prev,

@@ -83,13 +83,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ isOpen, onClose, onSubmit }) 
             />
           </div>
 
-          {formError && (
- feature/notes-page
-            <p className="text-red-500 dark:text-red-400 text-sm mb-4 bg-red-100 dark:bg-red-900 p-2 rounded-md">{formError}</p>
-
-            <p className="text-red-500 dark:text-red-400 text-sm mb-4 bg-red-100 dark:bg-red-900_ p-2 rounded-md">{formError}</p>
- main
-          )}
+{formError && (
+  <p className="text-red-500 dark:text-red-400 text-sm mb-4 bg-red-100 dark:bg-red-900 p-2 rounded-md">{formError}</p>
+)}
 
           <div className="flex justify-end space-x-3">
             <button
@@ -109,7 +105,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ isOpen, onClose, onSubmit }) 
         </form>
       </div>
       {/* Basic CSS for modal animation - can be moved to a global CSS file */}
-      <style jsx global>{`
+      <style>{`
         @keyframes modalFadeInScaleUp {
           from {
             transform: scale(0.95);
